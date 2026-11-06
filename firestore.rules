@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    function isValidRegistration(data) {
+      return data.keys().hasAll(['name', 'email', 'company', 'position', 'count', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['id', 'name', 'email', 'company', 'position', 'phone', 'count', 'note', 'createdAt', 'updatedAt'])
+        && (!('id' in data) || (data.id is string && data.id.size() <= 128))
+        && data.name is string && data.name.size() >= 2 && data.name.size() <= 30
+        && data.email is string && data.email.size() >= 5 && data.email.size() <= 120
+        && data.company is string && data.company.size() >= 1 && data.company.size() <= 80
+        && data.position is string && data.position.size() >= 1 && data.position.size() <= 40
+        && (!('phone' in data) || (data.phone is string && data.phone.size() <= 13))
+        && data.count is number && data.count >= 1 && data.count <= 10
+        && (!('note' in data) || (data.note is string && data.note.size() <= 500))
+        && data.createdAt is number
+        && data.updatedAt is number;
+    }
+
+    match /registrations/{registrationId} {
+      allow read: if true;
+      allow create: if isValidId(registrationId) && isValidRegistration(request.resource.data);
+      allow update: if isValidId(registrationId) && isValidRegistration(request.resource.data);
+      allow delete: if isValidId(registrationId);
+    }
+
+    match /events/{eventId} {
+      allow read: if true;
+      allow write: if isValidId(eventId);
+    }
+
+    match /admins/{adminId} {
+      allow read: if true;
+      allow write: if isValidId(adminId);
+    }
+
+    match /test/{docId} {
+      allow read: if true;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

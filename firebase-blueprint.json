@@ -1,0 +1,76 @@
+{
+  "entities": {
+    "Registration": {
+      "title": "Registration",
+      "description": "Event registration participant",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Document ID", "maxLength": 128 },
+        "name": { "type": "string", "description": "Applicant full name", "minLength": 2, "maxLength": 30 },
+        "email": { "type": "string", "description": "Applicant email address", "maxLength": 120 },
+        "company": { "type": "string", "description": "Company or organization", "maxLength": 80 },
+        "position": { "type": "string", "description": "Job title or position", "maxLength": 40 },
+        "phone": { "type": "string", "description": "Contact phone number", "maxLength": 13 },
+        "count": { "type": "number", "description": "Number of participants" },
+        "note": { "type": "string", "description": "Notes or remarks", "maxLength": 500 },
+        "createdAt": { "type": "number", "description": "Creation timestamp in ms" },
+        "updatedAt": { "type": "number", "description": "Last update timestamp in ms" }
+      },
+      "required": ["name", "email", "company", "position", "count", "createdAt", "updatedAt"]
+    },
+    "EventInfo": {
+      "title": "EventInfo",
+      "description": "Event metadata and banner settings",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Event name" },
+        "date": { "type": "string", "description": "Event date (YYYY-MM-DD)" },
+        "start": { "type": "string", "description": "Start time (HH:MM)" },
+        "end": { "type": "string", "description": "End time (HH:MM)" },
+        "addr": { "type": "string", "description": "Event venue or online link" },
+        "target": { "type": "string", "description": "Target audience" },
+        "bg": { "type": "string", "description": "Banner background color" },
+        "bgImg": { "type": "string", "description": "Banner background image URL or base64" },
+        "dim": { "type": "number", "description": "Dimming percentage" },
+        "tc": { "type": "string", "description": "Text color option" },
+        "tcc": { "type": "string", "description": "Custom text color hex" },
+        "spreadsheetId": { "type": "string", "description": "Google Spreadsheet ID for synchronization" },
+        "spreadsheetUrl": { "type": "string", "description": "Google Spreadsheet full URL" },
+        "sheetAutoSync": { "type": "boolean", "description": "Whether to auto-sync registrations to Google Sheets" },
+        "syncedAt": { "type": "number", "description": "Last synchronization timestamp" },
+        "updatedAt": { "type": "number", "description": "Update timestamp" }
+      }
+    },
+    "AdminUser": {
+      "title": "AdminUser",
+      "description": "Admin Google account credentials and info",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "description": "Admin Google email" },
+        "name": { "type": "string", "description": "Admin name" },
+        "createdAt": { "type": "number", "description": "Account created timestamp" },
+        "updatedAt": { "type": "number", "description": "Account updated timestamp" },
+        "lastLogin": { "type": "number", "description": "Last login timestamp" }
+      },
+      "required": ["email"]
+    }
+  },
+  "firestore": {
+    "/registrations/{registrationId}": {
+      "schema": { "$ref": "#/entities/Registration" },
+      "description": "Collection of event registrations"
+    },
+    "/events/{eventId}": {
+      "schema": { "$ref": "#/entities/EventInfo" },
+      "description": "Event configuration information"
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/AdminUser" },
+      "description": "Admin Google account emails"
+    },
+    "/test/{testId}": {
+      "schema": "string",
+      "description": "Connection test collection"
+    }
+  }
+}

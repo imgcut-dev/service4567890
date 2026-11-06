@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>이벤트 참가 신청</title>
+<style>
+:root {
+  --bg:#e9ebee; --surface:#ffffff; --text:#1f2430; --muted:#5b6270; --line:#d3d7dc;
+  --accent:#3b5bdb; --accent-text:#ffffff; --ok:#1f7a4d; --ok-bg:#e6f4ec; --err:#b42318; --err-bg:#fdecea;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:#14161b; --surface:#1d2027; --text:#eceef2; --muted:#9aa1ad; --line:#2d313a;
+    --accent:#7c93ff; --accent-text:#10131a; --ok:#6fd3a0; --ok-bg:#16301f; --err:#ff8a80; --err-bg:#3a1c1a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:#14161b; --surface:#1d2027; --text:#eceef2; --muted:#9aa1ad; --line:#2d313a;
+  --accent:#7c93ff; --accent-text:#10131a; --ok:#6fd3a0; --ok-bg:#16301f; --err:#ff8a80; --err-bg:#3a1c1a;
+  color-scheme: dark;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+* { box-sizing:border-box; }
+body {
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:"Pretendard","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  line-height:1.6;
+}
+.wrap { max-width:560px; margin:0 auto; padding:32px 20px 56px; }
+.hero { padding:8px 0 24px; }
+.tag { display:inline-block; font-size:12px; font-weight:600; letter-spacing:.04em; color:var(--accent); background:color-mix(in srgb,var(--accent) 12%,transparent); padding:4px 10px; border-radius:999px; }
+h1 { font-size:28px; line-height:1.3; margin:14px 0 10px; letter-spacing:-.01em; }
+.meta { display:grid; gap:6px; color:var(--muted); font-size:14.5px; margin:0; padding:0; list-style:none; }
+.meta b { color:var(--text); font-weight:600; margin-right:6px; }
+.card { background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:22px; }
+.card + .card { margin-top:16px; }
+h2 { font-size:17px; margin:0 0 16px; }
+label { display:block; font-size:14px; font-weight:600; margin:0 0 6px; }
+label .opt { color:var(--muted); font-weight:400; }
+.req { color:var(--err); font-weight:600; font-size:12px; font-style:normal; margin-left:4px; }
+.field { margin-bottom:16px; }
+.ferr { color:var(--err); font-size:13px; font-weight:600; margin-top:6px; }
+input.invalid { border-color:var(--err) !important; box-shadow:0 0 0 3px color-mix(in srgb,var(--err) 18%,transparent) !important; }
+input[type=text], input[type=email], input[type=tel], input[type=number], textarea {
+  width:100%; font:inherit; font-size:16px; color:var(--text); background:var(--bg);
+  border:1px solid var(--line); border-radius:10px; padding:11px 12px; outline:none;
+}
+input:focus, textarea:focus { border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent); }
+textarea { min-height:84px; resize:vertical; }
+.row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+@media (max-width:440px) { .row { grid-template-columns:1fr; } }
+.check { display:flex; gap:10px; align-items:flex-start; font-size:14px; font-weight:400; color:var(--muted); }
+.check input { margin-top:4px; width:18px; height:18px; accent-color:var(--accent); flex:none; }
+button { font:inherit; cursor:pointer; }
+.btn { width:100%; border:0; border-radius:12px; background:var(--accent); color:var(--accent-text); font-weight:700; font-size:16px; padding:14px; }
+.btn:disabled { opacity:.5; cursor:not-allowed; }
+.btn.ghost { background:transparent; color:var(--text); border:1px solid var(--line); font-weight:600; font-size:14px; padding:10px 14px; width:auto; }
+.btn.small { width:auto; padding:10px 14px; font-size:14px; }
+.notice { border-radius:10px; padding:12px 14px; font-size:14px; margin-top:14px; }
+.notice.ok { background:var(--ok-bg); color:var(--ok); }
+.notice.err { background:var(--err-bg); color:var(--err); }
+.notice.info { background:var(--bg); color:var(--muted); border:1px solid var(--line); }
+.done h2 { color:var(--ok); }
+.done dl { display:grid; grid-template-columns:90px 1fr; gap:6px 12px; margin:0 0 16px; font-size:14.5px; }
+.done dt { color:var(--muted); }
+.done dd { margin:0; word-break:break-all; }
+.actions { display:flex; gap:8px; flex-wrap:wrap; }
+.admin-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
+.admin-head h2 { margin:0; }
+.count { font-variant-numeric:tabular-nums; color:var(--muted); font-size:14px; }
+.tablebox { overflow-x:auto; border:1px solid var(--line); border-radius:10px; }
+table { border-collapse:collapse; width:100%; font-size:13.5px; min-width:520px; }
+th, td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--line); white-space:nowrap; }
+td.note { white-space:normal; min-width:140px; }
+th { color:var(--muted); font-weight:600; background:var(--bg); }
+tr:last-child td { border-bottom:0; }
+input[type=date], input[type=time] { width:100%; font:inherit; font-size:16px; color:var(--text); background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:10px 12px; outline:none; }
+input[type=date]:focus, input[type=time]:focus { border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent); }
+.dow { display:inline-block; margin-top:6px; font-size:13.5px; font-weight:600; color:var(--accent); }
+.wrap.wide { max-width:1180px; }
+.admin-layout { display:grid; grid-template-columns:220px minmax(0,1fr); gap:20px; align-items:start; }
+.side { position:sticky; top:16px; background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:14px; display:flex; flex-direction:column; gap:4px; }
+.side-title { font-weight:700; font-size:16px; padding:6px 12px 10px; }
+.side-nav, .side-foot { display:flex; flex-direction:column; gap:4px; }
+.side-foot { margin-top:12px; padding-top:12px; border-top:1px solid var(--line); }
+.side-item { background:transparent; border:0; text-align:left; color:var(--muted); font-weight:600; font-size:14.5px; padding:10px 12px; border-radius:10px; white-space:nowrap; }
+.side-item:hover { background:var(--bg); color:var(--text); }
+.side-item[aria-current="page"] { background:color-mix(in srgb,var(--accent) 14%,transparent); color:var(--accent); }
+.view-title { font-size:22px; margin:0 0 16px; }
+.kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin-bottom:16px; }
+.kpi, .card { min-width:0; }
+.kpi { background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:18px; }
+.kpi .lbl { color:var(--muted); font-size:13px; }
+.kpi .val { font-size:28px; font-weight:700; margin:6px 0 2px; font-variant-numeric:tabular-nums; }
+.kpi .sub { color:var(--muted); font-size:12.5px; }
+.dash-grid { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); gap:16px; }
+.dash-grid .card + .card { margin-top:0; }
+.bars { display:flex; align-items:flex-end; gap:10px; height:170px; }
+.bar { flex:1; height:100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:4px; font-size:12px; color:var(--muted); }
+.bar i { display:block; width:100%; max-width:44px; background:var(--accent); border-radius:6px 6px 0 0; min-height:3px; }
+.bar b { color:var(--text); font-variant-numeric:tabular-nums; }
+.sum { display:grid; grid-template-columns:64px 1fr; gap:6px 12px; margin:0 0 14px; font-size:14.5px; }
+.sum dt { color:var(--muted); }
+.sum dd { margin:0; word-break:break-all; }
+.dday { font-size:13px; font-weight:700; color:var(--accent); background:color-mix(in srgb,var(--accent) 12%,transparent); padding:3px 10px; border-radius:999px; }
+#eventCard { max-width:680px; }
+@media (max-width:1000px) { .kpis { grid-template-columns:repeat(2,minmax(0,1fr)); } .dash-grid { grid-template-columns:minmax(0,1fr); } }
+@media (max-width:820px) {
+  .admin-layout { grid-template-columns:minmax(0,1fr); }
+  .side-item { padding:8px 10px; font-size:14px; }
+  .side { position:static; flex-direction:row; flex-wrap:wrap; align-items:center; padding:8px; }
+  .side-title { display:none; }
+  .side-nav, .side-foot { flex-direction:row; flex-wrap:wrap; }
+  .side-foot { margin:0 0 0 auto; padding:0; border:0; }
+}
+.hero.styled { padding:28px 24px; border-radius:16px; margin-bottom:16px; background-size:cover; background-position:center; }
+.hero.tcol h1, .hero.tcol .meta b { color:var(--hfg); }
+.hero.tcol .meta { color:var(--hfg2); }
+.hero.tcol .tag { color:var(--hfg); background:rgba(127,127,127,.3); }
+.hero-prev { border:1px dashed var(--line); border-radius:16px; }
+.hero-prev h1 { font-size:22px; margin:10px 0 8px; }
+.hero-prev .meta { font-size:13.5px; }
+.sub-h { font-size:15px; font-weight:700; margin:22px 0 12px; padding-top:18px; border-top:1px solid var(--line); }
+.ctl { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.ctl input[type=color] { width:44px; height:36px; padding:2px; border:1px solid var(--line); border-radius:8px; background:var(--bg); }
+.ctl input[type=range] { flex:1; min-width:140px; accent-color:var(--accent); }
+.ctl select, .ctl input[type=file] { font:inherit; font-size:14px; color:var(--text); background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:8px 10px; max-width:100%; }
+.sw { width:28px; height:28px; border-radius:50%; border:2px solid var(--surface); box-shadow:0 0 0 1px var(--line); padding:0; }
+.hint { font-size:12.5px; color:var(--muted); }
+input[type=password] { width:100%; font:inherit; font-size:16px; color:var(--text); background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:11px 12px; outline:none; }
+input[type=password]:focus { border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent); }
+#listSearch:focus { border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent); }
+input[readonly] { opacity:.7; cursor:not-allowed; }
+.gate input { margin-bottom:10px; }
+.me { color:var(--accent); font-size:12px; font-weight:700; margin-left:6px; }
+.hidden { display:none !important; }
+.topbar { display:flex; justify-content:flex-end; margin:-18px -8px 0 0; }
+.adminlink { background:transparent; border:0; color:var(--muted); opacity:.55; font-size:12px; padding:6px 8px; border-radius:6px; }
+.adminlink:hover, .adminlink:focus-visible { opacity:1; text-decoration:underline; }
+.toprow { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.tabs { display:flex; gap:6px; margin:0 0 16px; border-bottom:1px solid var(--line); }
+.tab { background:transparent; border:0; border-bottom:3px solid transparent; color:var(--muted); font-weight:600; font-size:15px; padding:10px 14px; margin-bottom:-1px; }
+.tab[aria-selected="true"] { color:var(--accent); border-bottom-color:var(--accent); }
+.tab.admin { margin-left:auto; border:1px solid var(--line); border-radius:10px; margin-bottom:6px; padding:7px 12px; font-size:14px; color:var(--text); }
+.tab.admin[aria-selected="true"] { background:var(--accent); color:var(--accent-text); border-color:var(--accent); }
+.gate { max-width:360px; }
+.gate input[type=password] { width:100%; font:inherit; font-size:16px; color:var(--text); background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:11px 12px; outline:none; margin-bottom:10px; }
+.gate input[type=password]:focus { border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar"><button class="adminlink" id="tabAdmin" type="button">관리자</button></div>
+  <header class="hero" id="heroEl">
+    <span class="tag">참가 신청</span>
+    <h1 id="evTitle">이벤트 이름을 입력하세요</h1>
+    <ul class="meta">
+      <li><b>일시</b><span id="evWhen">0000년 00월 00일 (요일) 00:00</span></li>
+      <li><b>장소</b><span id="evPlace">장소 또는 온라인 링크 안내</span></li>
+      <li><b>대상</b><span id="evTarget">참가 대상 안내</span></li>
+    </ul>
+  </header>
+
+  <div id="panelApply">
+  <section class="card" id="formCard">
+    <h2>신청 정보</h2>
+    <div id="formBox">
+      <div class="field">
+        <label for="name">이름 <span class="req">(*필수)</span></label>
+        <input id="name" type="text" maxlength="30" autocomplete="name" placeholder="한글 또는 영문, 공백 없이 (예: 홍길동, GildongHong)">
+      </div>
+      <div class="field">
+        <label for="email">이메일 <span class="req">(*필수)</span></label>
+        <input id="email" type="email" maxlength="120" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="영문 이메일 (name@example.com)">
+        <div class="ferr hidden" id="emailErr" aria-live="polite"></div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="company">회사명·소속 <span class="req">(*필수)</span></label>
+          <input id="company" type="text" maxlength="80" autocomplete="organization" placeholder="회사명 또는 학교·기관명">
+        </div>
+        <div class="field">
+          <label for="position">직급·직책 <span class="req">(*필수)</span></label>
+          <input id="position" type="text" maxlength="40" autocomplete="organization-title" placeholder="예: 매니저, 학생">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="phone">연락처 <span class="opt">(선택)</span></label>
+          <input id="phone" type="tel" maxlength="13" autocomplete="tel" inputmode="numeric" placeholder="숫자만 입력 (- 자동 입력)">
+          <div class="ferr hidden" id="phoneErr" aria-live="polite"></div>
+        </div>
+        <div class="field">
+          <label for="count">참석 인원 <span class="req">(*필수)</span></label>
+          <input id="count" type="number" min="1" max="10" value="1" inputmode="numeric">
+        </div>
+      </div>
+      <div class="field">
+        <label for="note">남기실 말씀 <span class="opt">(선택)</span></label>
+        <textarea id="note" maxlength="500" placeholder="한글·영문으로 입력해 주세요"></textarea>
+        <div id="noteCount" style="text-align:right;font-size:12.5px;color:var(--muted);margin-top:4px;font-variant-numeric:tabular-nums">0/500</div>
+      </div>
+      <div class="field">
+        <div style="font-size:14px;font-weight:600;margin:0 0 8px">개인정보 동의 및 파기</div>
+        <label class="check"><input id="consent" type="checkbox"><span>행사 운영 안내를 위해 이름·이메일·연락처를 수집하고 이벤트 종료 후 파기하는 데 동의합니다. <span class="req">(*필수)</span></span></label>
+      </div>
+      <button class="btn" id="submitBtn">신청하기</button>
+      <div id="msg" class="notice info hidden" aria-live="polite"></div>
+    </div>
+
+    <div id="doneBox" class="done hidden">
+      <h2>신청이 접수되었습니다</h2>
+      <dl id="doneList"></dl>
+      <div class="actions">
+        <button class="btn ghost" id="editBtn">내용 수정</button>
+        <button class="btn ghost" id="cancelBtn">신청 취소</button>
+        <button class="btn ghost" id="newBtn">다른 분 신청하기</button>
+      </div>
+      <div id="doneMsg" class="notice info hidden" aria-live="polite"></div>
+    </div>
+  </section>
+  </div>
+
+  <div id="panelAdmin" class="hidden">
+  <button class="btn ghost small" id="tabApply" style="margin-bottom:14px">← 신청 페이지로</button>
+  <section class="card gate" id="adminGate">
+    <h2>관리자 로그인</h2>
+    <input id="adminId" type="text" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="관리자 아이디 (예: admin001)">
+    <input id="adminPin" type="password" autocomplete="current-password" placeholder="비밀번호">
+    <div class="ferr hidden" id="pinErr" aria-live="polite"></div>
+    <button class="btn small" id="pinBtn" style="margin-top:6px">로그인</button>
+  </section>
+
+  <div id="adminBody" class="hidden">
+  <div class="admin-layout">
+    <aside class="side">
+      <div class="side-title">관리자<div id="whoami" style="font-size:12px;font-weight:400;color:var(--muted)"></div></div>
+      <nav class="side-nav">
+        <button type="button" class="side-item" data-view="dash" aria-current="page">대시보드</button>
+        <button type="button" class="side-item" data-view="list">신청자 명단</button>
+        <button type="button" class="side-item" data-view="event">이벤트 설정</button>
+        <button type="button" class="side-item" data-view="admins">관리자 관리</button>
+      </nav>
+      <div class="side-foot">
+        <button type="button" class="side-item" id="sideApply">신청 페이지로</button>
+        <button type="button" class="side-item" id="logoutBtn">로그아웃</button>
+      </div>
+    </aside>
+    <main class="main">
+      <section id="viewDash">
+        <h2 class="view-title">대시보드</h2>
+        <div class="notice err hidden" id="pwWarn" style="margin:0 0 16px">임시 비밀번호를 사용 중입니다. 비밀번호를 변경해 주세요. <button type="button" class="btn ghost small" id="pwWarnBtn" style="margin-left:6px">지금 변경</button></div>
+        <div class="kpis">
+          <div class="kpi"><div class="lbl">등록된 신청자</div><div class="val" id="kCount">0건</div><div class="sub" id="kCountSub">-</div></div>
+          <div class="kpi"><div class="lbl">총 참석 인원</div><div class="val" id="kPeople">0명</div><div class="sub" id="kPeopleSub">-</div></div>
+          <div class="kpi"><div class="lbl">가장 최근 등록</div><div class="val" id="kLast" style="font-size:18px">-</div><div class="sub" id="kLastSub">-</div></div>
+          <div class="kpi"><div class="lbl">오늘 신규</div><div class="val" id="kToday">0건</div><div class="sub" id="kTodaySub">-</div></div>
+        </div>
+        <div class="dash-grid">
+          <section class="card">
+            <h2>최근 7일 신청 추이</h2>
+            <div class="bars" id="dTrend"></div>
+          </section>
+          <section class="card">
+            <div class="admin-head"><h2>이벤트 요약</h2><span class="dday" id="dDday"></span></div>
+            <dl class="sum" id="dEvent"></dl>
+            <button type="button" class="btn ghost small" data-view="event">이벤트 설정 열기</button>
+          </section>
+        </div>
+        <section class="card" style="margin-top:16px">
+          <div class="admin-head"><h2>최근 신청 5건</h2><button type="button" class="btn ghost small" data-view="list">전체 명단 보기</button></div>
+          <div class="tablebox">
+            <table style="min-width:420px">
+              <thead><tr><th>접수</th><th>이름</th><th>회사·소속</th><th>인원</th></tr></thead>
+              <tbody id="dRecent"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+      <section id="viewList" class="hidden">
+        <h2 class="view-title">신청자 명단</h2>
+  <section class="card" id="listCard">
+    <div class="admin-head">
+      <h2>신청자 명단</h2>
+      <span class="count" id="listCount">0건</span>
+    </div>
+    <p style="margin:0 0 12px;font-size:13px;color:var(--muted)">화면에서는 이름과 연락처 가운데 자리가 마스킹되어 표시됩니다. CSV 다운로드에는 원본 전체가 포함됩니다. 이 브라우저에만 임시 저장된 명단이며, 다른 기기·브라우저에서는 보이지 않고 브라우저 데이터를 지우면 사라집니다.</p>
+    <div class="ctl" style="margin:0 0 12px">
+      <input id="listSearch" type="search" autocomplete="off" spellcheck="false" placeholder="이메일로 검색 (예: gmail, kim@)" style="flex:1;min-width:200px;font:inherit;font-size:15px;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;outline:none">
+      <button type="button" class="btn ghost small" id="listSearchClear">초기화</button>
+    </div>
+    <div class="tablebox">
+      <table style="min-width:780px">
+        <thead><tr><th>접수</th><th>이름</th><th>이메일</th><th>회사·소속</th><th>직급</th><th>연락처</th><th>인원</th><th></th></tr></thead>
+        <tbody id="listRows"></tbody>
+      </table>
+    </div>
+    <div class="actions" style="margin-top:14px">
+      <button class="btn small" id="csvBtn">CSV 전체 다운로드</button>
+      <button class="btn ghost" id="clearAllBtn">명단 전체 삭제</button>
+    </div>
+    <div class="hint" id="csvLog" style="margin-top:10px"></div>
+  </section>
+      </section>
+      <section id="viewEvent" class="hidden">
+        <h2 class="view-title">이벤트 설정</h2>
+  <section class="card" id="eventCard">
+        <div class="field">
+      <label for="evName">이벤트 이름</label>
+      <input id="evName" type="text" maxlength="80" placeholder="예: 2026 AI PM 밋업">
+    </div>
+    <div class="field">
+      <label for="evDate">일시</label>
+      <input id="evDate" type="date">
+      <span class="dow" id="evDow"></span>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label for="evStart">시작 시간</label>
+        <input id="evStart" type="time">
+      </div>
+      <div class="field">
+        <label for="evEnd">끝나는 시간</label>
+        <input id="evEnd" type="time">
+      </div>
+    </div>
+    <div class="field">
+      <label for="evAddr">장소 <span class="opt">(주소 입력)</span></label>
+      <input id="evAddr" type="text" maxlength="150" placeholder="예: 서울특별시 강남구 테헤란로 123, 5층">
+    </div>
+    <div class="field">
+      <label for="evTgt">대상 <span class="opt">(참가 대상 안내)</span></label>
+      <input id="evTgt" type="text" maxlength="100" placeholder="예: AI·플랫폼 기획에 관심 있는 누구나">
+    </div>
+    <div class="sub-h">상단 배너 디자인</div>
+    <div class="field"><div id="heroPrev" class="hero hero-prev"></div></div>
+    <div class="field">
+      <label>배경 색상</label>
+      <div class="ctl">
+        <label class="check" style="margin:0"><input id="evBgOn" type="checkbox"><span>색상 사용</span></label>
+        <input id="evBgColor" type="color" value="#3b5bdb">
+        <span id="evSw" class="ctl"></span>
+      </div>
+    </div>
+    <div class="field">
+      <label for="evImgFile">배경 이미지 <span class="opt">(선택)</span></label>
+      <div class="ctl">
+        <input id="evImgFile" type="file" accept="image/*">
+        <button type="button" class="btn ghost small" id="evImgDel">이미지 삭제</button>
+      </div>
+      <div class="hint" id="evImgInfo">이미지는 가로 1280px 이내로 자동 축소되어 저장됩니다.</div>
+    </div>
+    <div class="field">
+      <label for="evDim">이미지 어둡게 <span class="opt" id="evDimVal">35%</span></label>
+      <div class="ctl"><input id="evDim" type="range" min="0" max="80" step="5" value="35"></div>
+    </div>
+    <div class="field">
+      <label for="evTc">글자색</label>
+      <div class="ctl"><select id="evTc"><option value="auto">자동</option><option value="light">밝게(흰색)</option><option value="dark">어둡게(검정)</option><option value="custom">직접 선택</option></select><input id="evTcColor" type="color" value="#ffffff" class="hidden"></div>
+    </div>
+    <div class="actions">
+      <button class="btn small" id="evSave">저장</button>
+      <button class="btn ghost" id="evReset">초기화</button>
+    </div>
+    <div id="evMsg" class="notice info hidden" aria-live="polite"></div>
+  </section>
+      </section>
+      <section id="viewAdmins" class="hidden">
+        <h2 class="view-title">관리자 관리</h2>
+        <section class="card">
+          <div class="admin-head"><h2>관리자 계정</h2><span class="count" id="adCount"></span></div>
+          <div class="tablebox">
+            <table style="min-width:560px">
+              <thead><tr><th>아이디</th><th>이름</th><th>생성</th><th>최근 로그인</th><th></th></tr></thead>
+              <tbody id="adRows"></tbody>
+            </table>
+          </div>
+          <div id="adListMsg" class="notice info hidden" aria-live="polite"></div>
+        </section>
+        <section class="card" id="adForm" style="margin-top:16px;max-width:680px">
+          <h2 id="adFormTitle">관리자 추가</h2>
+          <div class="field"><label for="adId">아이디 <span class="opt">(자동 부여, 변경 불가)</span></label><input id="adId" type="text" readonly></div>
+          <div class="field"><label for="adName">이름</label><input id="adName" type="text" maxlength="30" placeholder="예: 홍길동 매니저"></div>
+          <div class="field hidden" id="adCurWrap"><label for="adCur">현재 비밀번호</label><input id="adCur" type="password" autocomplete="current-password"></div>
+          <div class="row">
+            <div class="field"><label for="adPw" id="adPwLbl">비밀번호</label><input id="adPw" type="password" autocomplete="new-password"></div>
+            <div class="field"><label for="adPw2">비밀번호 확인</label><input id="adPw2" type="password" autocomplete="new-password"></div>
+          </div>
+          <div class="hint" style="margin:-6px 0 14px">8자 이상, 영문과 숫자를 함께 사용해 주세요.</div>
+          <div class="actions"><button class="btn small" id="adSave">추가</button><button class="btn ghost" id="adCancel">취소</button></div>
+          <div id="adMsg" class="notice info hidden" aria-live="polite"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+  </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var KEY = 'event_signup_list_v1';
+  var mem = [], usingMem = false, currentId = null;
+
+  function setMsg(el, text, kind) {
+    el.textContent = text;
+    el.className = 'notice ' + kind;
+    el.classList.toggle('hidden', !text);
+  }
+  function fmt(ts) {
+    var d = new Date(ts);
+    return isNaN(d) ? '' : d.getFullYear() + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + String(d.getDate()).padStart(2, '0') + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
+
+  /* 브라우저 전용 저장소: localStorage, 사용 불가 시 이 탭의 메모리로 대체 */
+  function loadList() {
+    if (usingMem) return mem;
+    try {
+      var raw = localStorage.getItem(KEY);
+      var arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch (e) {
+      usingMem = true;
+      return mem;
+    }
+  }
+  function saveList(arr) {
+    if (!usingMem) {
+      try { localStorage.setItem(KEY, JSON.stringify(arr)); return true; }
+      catch (e) { usingMem = true; }
+    }
+    mem = arr;
+    return false;
+  }
+  function findIndexById(list, id) {
+    for (var i = 0; i < list.length; i++) if (list[i].id === id) return i;
+    return -1;
+  }
+
+  function validate() {
+    var name = $('name').value.trim(), email = $('email').value.trim();
+    var n = parseInt($('count').value, 10);
+    if (!name) return '이름을 입력해 주세요.';
+    if (!/^[가-힣A-Za-z]{2,30}$/.test(name)) return '이름은 공백 없이 한글 또는 영문 2자 이상으로 입력해 주세요.';
+    if (!/^[A-Za-z0-9._%+\-]+@[A-Za-z0-9\-]+(\.[A-Za-z0-9\-]+)*\.[A-Za-z]{2,}$/.test(email)) return '이메일은 영문 이메일 형식(name@example.com)으로 입력해 주세요.';
+    if (!$('company').value.trim()) return '회사명·소속을 입력해 주세요.';
+    if (!$('position').value.trim()) return '직급·직책을 입력해 주세요.';
+    var phone = $('phone').value.trim();
+    if (phone && !/^\d{2,3}-\d{3,4}-\d{4}$/.test(phone)) return '연락처는 숫자와 - 형식(예: 010-1234-5678)으로 입력해 주세요.';
+    if (!(n >= 1 && n <= 10)) return '참석 인원은 1~10명 사이로 입력해 주세요.';
+    if (!$('consent').checked) return '__CONSENT__';
+    return '';
+  }
+
+  function clearForm() {
+    $('name').value = ''; $('email').value = ''; $('company').value = ''; $('position').value = '';
+    $('phone').value = ''; $('count').value = 1; $('note').value = '';
+    $('note').dispatchEvent(new Event('input'));
+    $('consent').checked = false;
+    setFieldError('email', '');
+    setFieldError('phone', '');
+  }
+  function showDone(data) {
+    var dl = $('doneList');
+    dl.textContent = '';
+    [['이름', data.name], ['이메일', data.email], ['회사·소속', data.company || '-'], ['직급', data.position || '-'], ['연락처', data.phone || '-'], ['인원', data.count + '명'], ['접수', fmt(data.createdAt)]].forEach(function (p) {
+      var dt = document.createElement('dt'); dt.textContent = p[0];
+      var dd = document.createElement('dd'); dd.textContent = p[1];
+      dl.appendChild(dt); dl.appendChild(dd);
+    });
+    $('formBox').classList.add('hidden');
+    $('doneBox').classList.remove('hidden');
+  }
+  function showForm() {
+    $('doneBox').classList.add('hidden');
+    $('formBox').classList.remove('hidden');
+    setMsg($('msg'), '', 'info');
+  }
+  function resetToNewForm() {
+    currentId = null;
+    clearForm();
+    setMsg($('doneMsg'), '', 'info');
+    showForm();
+  }
+
+  /* 마스킹: 김길동 -> 김**, 010-1234-5678 -> 010-****-5678 */
+  function maskName(n) {
+    n = (n || '').trim();
+    if (!n) return '-';
+    return n.charAt(0) + new Array(Math.max(n.length - 1, 1) + 1).join('*');
+  }
+  function maskPhone(p) {
+    if (!p) return '-';
+    var m = String(p).match(/^(\d{2,3})-(\d{3,4})-(\d{4})$/);
+    return m ? m[1] + '-****-' + m[3] : '****';
+  }
+
+  /* 탭 전환 및 관리자 확인 (주의: 브라우저 내 간단 확인용이며 실제 보안 수단이 아님) */
+  /* 관리자 계정 (이 브라우저에 저장, 비밀번호는 솔트+SHA-256 해시로 보관) */
+  var AD_KEY = 'event_admins_v1', adMem = null;
+  var curAdmin = '', adminOk = false, editId = null, attempts = 0, lockUntil = 0;
+  function adLoad() {
+    try {
+      var r = localStorage.getItem(AD_KEY), o = r ? JSON.parse(r) : null;
+      if (o && Array.isArray(o.list)) return o;
+      return { seq: 0, list: [] };
+    } catch (e) { return adMem || { seq: 0, list: [] }; }
+  }
+  function adStore(o) {
+    adMem = o;
+    try { localStorage.setItem(AD_KEY, JSON.stringify(o)); return true; } catch (e) { return false; }
+  }
+  function adFind(o, id) { for (var i = 0; i < o.list.length; i++) if (o.list[i].id === id) return o.list[i]; return null; }
+  function nextAdId(o) { return 'admin' + String(o.seq + 1).padStart(3, '0'); }
+  function newSalt() {
+    var a = new Uint8Array(8), out = '', i;
+    if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(a); else for (i = 0; i < 8; i++) a[i] = Math.floor(Math.random() * 256);
+    for (i = 0; i < 8; i++) out += ('0' + a[i].toString(16)).slice(-2);
+    return out;
+  }
+  async function hashPw(salt, pw) {
+    var txt = salt + ':' + pw;
+    if (window.crypto && crypto.subtle && window.TextEncoder) {
+      var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt));
+      return 's:' + Array.prototype.map.call(new Uint8Array(buf), function (b) { return ('0' + b.toString(16)).slice(-2); }).join('');
+    }
+    var h = 5381;
+    for (var i = 0; i < txt.length; i++) h = ((h << 5) + h + txt.charCodeAt(i)) | 0;
+    return 'f:' + (h >>> 0).toString(16);
+  }
+  async function checkPw(a, pw) { return (await hashPw(a.salt, pw)) === a.hash; }
+  function pwOk(p) { return p.length >= 8 && /[A-Za-z]/.test(p) && /\d/.test(p); }
+  async function makeAdmin(o, name, pw, must) {
+    var salt = newSalt(), now = Date.now();
+    o.seq += 1;
+    var a = { id: 'admin' + String(o.seq).padStart(3, '0'), name: name, salt: salt, hash: await hashPw(salt, pw), createdAt: now, updatedAt: now, lastLogin: 0, mustChange: !!must };
+    o.list.push(a);
+    return a;
+  }
+  async function ensureSeed() {
+    var o = adLoad();
+    if (!o.list.length) { await makeAdmin(o, '기본 관리자', '0000', true); adStore(o); }
+  }
+  function curAdminObj() { return curAdmin ? adFind(adLoad(), curAdmin) : null; }
+  function setAdmin(id) {
+    curAdmin = id || ''; adminOk = !!id;
+    try { if (id) sessionStorage.setItem('event_admin_id', id); else sessionStorage.removeItem('event_admin_id'); } catch (e) {}
+  }
+  try { var sid = sessionStorage.getItem('event_admin_id'); if (sid && adFind(adLoad(), sid)) setAdmin(sid); } catch (e) {}
+  function updateWho() {
+    var a = curAdminObj();
+    $('whoami').textContent = a ? a.id + (a.name ? ' · ' + a.name : '') : '';
+    $('pwWarn').classList.toggle('hidden', !(a && a.mustChange));
+  }
+  var curView = 'dash';
+  function showView(v) {
+    curView = v;
+    ['dash', 'list', 'event', 'admins'].forEach(function (k) {
+      $('view' + k.charAt(0).toUpperCase() + k.slice(1)).classList.toggle('hidden', k !== v);
+    });
+    var items = document.querySelectorAll('.side-item[data-view]');
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].getAttribute('data-view') === v) items[i].setAttribute('aria-current', 'page');
+      else items[i].removeAttribute('aria-current');
+    }
+    if (v === 'dash') renderDash();
+    if (v === 'list') { renderList(); renderCsvLog(); }
+    if (v === 'event') fillEventForm();
+    if (v === 'admins') { editId = null; renderAdmins(); setAdForm(); }
+    updateWho();
+    window.scrollTo(0, 0);
+  }
+  function showTab(which) {
+    var admin = which === 'admin';
+    $('panelApply').classList.toggle('hidden', admin);
+    $('panelAdmin').classList.toggle('hidden', !admin);
+    $('tabAdmin').classList.toggle('hidden', admin);
+    $('heroEl').classList.toggle('hidden', admin);
+    document.querySelector('.topbar').classList.toggle('hidden', admin);
+    document.querySelector('.wrap').classList.toggle('wide', admin && adminOk);
+    if (admin) {
+      $('tabApply').classList.toggle('hidden', adminOk);
+      $('adminGate').classList.toggle('hidden', adminOk);
+      $('adminBody').classList.toggle('hidden', !adminOk);
+      if (adminOk) showView(curView); else { $('adminId').value = ''; $('adminPin').value = ''; $('adminId').focus(); }
+    }
+  }
+  function pinErr(t) { $('pinErr').textContent = t; $('pinErr').classList.toggle('hidden', !t); }
+  async function tryLogin() {
+    var now = Date.now();
+    if (now < lockUntil) { pinErr('로그인 시도가 너무 많습니다. ' + Math.ceil((lockUntil - now) / 1000) + '초 후 다시 시도해 주세요.'); return; }
+    await ensureSeed();
+    var id = $('adminId').value.trim().toLowerCase(), pw = $('adminPin').value;
+    var o = adLoad(), a = adFind(o, id);
+    var ok = a ? await checkPw(a, pw) : false;
+    if (!ok) {
+      attempts++;
+      if (attempts >= 5) { lockUntil = Date.now() + 30000; attempts = 0; }
+      pinErr('아이디 또는 비밀번호가 올바르지 않습니다.');
+      return;
+    }
+    attempts = 0; a.lastLogin = Date.now(); adStore(o);
+    setAdmin(a.id); pinErr(''); $('adminPin').value = '';
+    curView = 'dash';
+    showTab('admin');
+  }
+  $('tabApply').addEventListener('click', function () { showTab('apply'); });
+  $('tabAdmin').addEventListener('click', function () { showTab('admin'); });
+  $('pinBtn').addEventListener('click', tryLogin);
+  ['adminId', 'adminPin'].forEach(function (id) { $(id).addEventListener('keydown', function (e) { if (e.key === 'Enter') tryLogin(); }); });
+  $('sideApply').addEventListener('click', function () { showTab('apply'); });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-view]'), function (el) {
+    el.addEventListener('click', function () { showView(el.getAttribute('data-view')); });
+  });
+  $('logoutBtn').addEventListener('click', function () { setAdmin(false); showTab('apply'); });
+
+  /* CSV 전체 다운로드: 화면과 달리 원본 + 메모 포함, 접수순 정렬 */
+  var CSV_LOG_KEY = 'event_csv_log_v1', csvMem = [];
+  function csvLogLoad() {
+    try { var r = localStorage.getItem(CSV_LOG_KEY), a = r ? JSON.parse(r) : []; return Array.isArray(a) ? a : []; } catch (e) { return csvMem; }
+  }
+  function csvLogAdd(by, rows) {
+    var a = csvLogLoad(); a.push({ at: Date.now(), by: by, rows: rows }); a = a.slice(-20); csvMem = a;
+    try { localStorage.setItem(CSV_LOG_KEY, JSON.stringify(a)); } catch (e) {}
+    renderCsvLog();
+  }
+  function renderCsvLog() {
+    var a = csvLogLoad(), el = $('csvLog');
+    el.textContent = a.length ? '최근 CSV 다운로드: ' + fmt(a[a.length - 1].at) + ' · ' + a[a.length - 1].by + ' · ' + a[a.length - 1].rows + '건 (누적 ' + a.length + '회)' : '아직 CSV를 다운로드한 기록이 없습니다.';
+  }
+  function csvCell(v) {
+    v = v == null ? '' : String(v);
+    if (/^[=+\-@\t\r]/.test(v)) v = "'" + v;
+    return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+  }
+  function isoTime(ts) {
+    var d = new Date(ts);
+    if (isNaN(d)) return '';
+    var p = function (n) { return String(n).padStart(2, '0'); };
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+  function downloadCsv() {
+    var list = loadList().slice().sort(function (a, b) { return (a.createdAt || 0) - (b.createdAt || 0); });
+    if (!list.length) { alert('다운로드할 신청 내역이 없습니다.'); return; }
+    if (!confirm('실명·이메일·연락처 원본이 포함된 CSV를 내려받습니다.\n안전한 곳에만 보관하고, 이벤트 종료 후 파기해 주세요.\n\n계속할까요?')) return;
+    var head = ['순번', '접수일시', '수정일시', '이름', '이메일', '회사·소속', '직급·직책', '연락처', '참석인원', '남기실 말씀'];
+    var lines = [head.map(csvCell).join(',')];
+    list.forEach(function (r, i) {
+      lines.push([i + 1, isoTime(r.createdAt), isoTime(r.updatedAt || r.createdAt), r.name, r.email, r.company, r.position, r.phone || '', r.count || 1, r.note || ''].map(csvCell).join(','));
+    });
+    var blob = new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    var now = new Date(), p = function (n) { return String(n).padStart(2, '0'); };
+    var fname = 'signups_' + now.getFullYear() + p(now.getMonth() + 1) + p(now.getDate()) + '_' + p(now.getHours()) + p(now.getMinutes()) + '.csv';
+    var url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = fname; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    csvLogAdd(curAdmin || '-', list.length);
+  }
+  $('csvBtn').addEventListener('click', downloadCsv);
+  $('listSearch').addEventListener('input', renderList);
+  $('listSearch').addEventListener('keydown', function (e) { if (e.key === 'Escape') { this.value = ''; renderList(); } });
+  $('listSearchClear').addEventListener('click', function () { $('listSearch').value = ''; renderList(); $('listSearch').focus(); });
+
+  /* 관리자 관리 CRUD */
+  function adMsg(el, t, kind) { setMsg(el, t, kind); }
+  function renderAdmins() {
+    var o = adLoad(), tb = $('adRows');
+    tb.textContent = '';
+    o.list.forEach(function (a) {
+      var tr = document.createElement('tr');
+      var td = document.createElement('td'); td.textContent = a.id;
+      if (a.id === curAdmin) { var me = document.createElement('span'); me.className = 'me'; me.textContent = '나'; td.appendChild(me); }
+      tr.appendChild(td);
+      [a.name || '-', fmt(a.createdAt), a.lastLogin ? fmt(a.lastLogin) : '-'].forEach(function (v) {
+        var c = document.createElement('td'); c.textContent = v; tr.appendChild(c);
+      });
+      var act = document.createElement('td');
+      var eb = document.createElement('button'); eb.type = 'button'; eb.className = 'btn ghost'; eb.style.cssText = 'padding:6px 10px;font-size:13px;margin-right:6px'; eb.textContent = '수정';
+      eb.addEventListener('click', function () { editId = a.id; setAdForm(); $('adName').focus(); });
+      var db = document.createElement('button'); db.type = 'button'; db.className = 'btn ghost'; db.style.cssText = 'padding:6px 10px;font-size:13px';
+      db.textContent = '삭제';
+      if (a.id === curAdmin || o.list.length < 2) { db.disabled = true; db.style.opacity = '.45'; db.title = a.id === curAdmin ? '로그인 중인 계정은 삭제할 수 없습니다.' : '마지막 관리자는 삭제할 수 없습니다.'; }
+      db.addEventListener('click', function () { delAdmin(a.id); });
+      act.appendChild(eb); act.appendChild(db); tr.appendChild(act);
+      tb.appendChild(tr);
+    });
+    $('adCount').textContent = o.list.length + '명';
+  }
+  function setAdForm() {
+    var o = adLoad(), a = editId ? adFind(o, editId) : null;
+    if (editId && !a) { editId = null; }
+    $('adFormTitle').textContent = a ? '관리자 수정 (' + a.id + ')' : '관리자 추가';
+    $('adId').value = a ? a.id : nextAdId(o);
+    $('adName').value = a ? a.name || '' : '';
+    $('adCur').value = ''; $('adPw').value = ''; $('adPw2').value = '';
+    $('adCurWrap').classList.toggle('hidden', !(a && a.id === curAdmin));
+    $('adPwLbl').textContent = a ? '새 비밀번호 (변경 시에만 입력)' : '비밀번호';
+    $('adSave').textContent = a ? '저장' : '추가';
+    $('adCancel').classList.toggle('hidden', !a);
+  }
+  async function saveAdmin() {
+    var m = $('adMsg'), name = $('adName').value.trim(), pw = $('adPw').value, pw2 = $('adPw2').value;
+    if (name.length < 2) { adMsg(m, '이름을 2자 이상 입력해 주세요.', 'err'); return; }
+    var o = adLoad(), a = editId ? adFind(o, editId) : null;
+    if (!a) {
+      if (!pwOk(pw)) { adMsg(m, '비밀번호는 8자 이상, 영문과 숫자를 함께 사용해야 합니다.', 'err'); return; }
+      if (pw !== pw2) { adMsg(m, '비밀번호 확인이 일치하지 않습니다.', 'err'); return; }
+      var na = await makeAdmin(o, name, pw, true);
+      if (!adStore(o)) { adMsg(m, '저장 공간을 사용할 수 없습니다.', 'err'); return; }
+      renderAdmins(); setAdForm();
+      adMsg(m, '관리자가 추가되었습니다. 부여된 아이디: ' + na.id, 'ok');
+      return;
+    }
+    var self = a.id === curAdmin;
+    if (pw || pw2) {
+      if (!pwOk(pw)) { adMsg(m, '새 비밀번호는 8자 이상, 영문과 숫자를 함께 사용해야 합니다.', 'err'); return; }
+      if (pw !== pw2) { adMsg(m, '비밀번호 확인이 일치하지 않습니다.', 'err'); return; }
+      if (self && !(await checkPw(a, $('adCur').value))) { adMsg(m, '현재 비밀번호가 올바르지 않습니다.', 'err'); return; }
+      a.salt = newSalt(); a.hash = await hashPw(a.salt, pw);
+      a.mustChange = !self;
+    }
+    a.name = name; a.updatedAt = Date.now();
+    if (!adStore(o)) { adMsg(m, '저장 공간을 사용할 수 없습니다.', 'err'); return; }
+    var changedPw = !!pw;
+    editId = null; renderAdmins(); setAdForm(); updateWho();
+    adMsg(m, changedPw ? '저장되었습니다. 비밀번호가 변경되었습니다.' : '저장되었습니다.', 'ok');
+  }
+  function delAdmin(id) {
+    var o = adLoad();
+    if (id === curAdmin) { adMsg($('adListMsg'), '로그인 중인 계정은 삭제할 수 없습니다.', 'err'); return; }
+    if (o.list.length < 2) { adMsg($('adListMsg'), '마지막 관리자는 삭제할 수 없습니다.', 'err'); return; }
+    if (!confirm(id + ' 관리자를 삭제할까요?')) return;
+    o.list = o.list.filter(function (a) { return a.id !== id; });
+    adStore(o);
+    if (editId === id) editId = null;
+    renderAdmins(); setAdForm();
+    adMsg($('adListMsg'), id + ' 관리자가 삭제되었습니다. (아이디는 재사용되지 않습니다)', 'ok');
+  }
+  $('adSave').addEventListener('click', saveAdmin);
+  $('adCancel').addEventListener('click', function () { editId = null; setAdForm(); setMsg($('adMsg'), '', 'info'); });
+  $('pwWarnBtn').addEventListener('click', function () { showView('admins'); editId = curAdmin; setAdForm(); $('adCur').focus(); });
+
+  /* 이벤트 정보 설정 (이 브라우저에 저장) */
+  var EV_KEY = 'event_info_v1', evMem = {};
+  var DOW = ['일', '월', '화', '수', '목', '금', '토'];
+  function evLoad() {
+    try { var r = localStorage.getItem(EV_KEY); var o = r ? JSON.parse(r) : {}; return o && typeof o === 'object' ? o : {}; }
+    catch (e) { return evMem; }
+  }
+  function evStore(o) {
+    evMem = o;
+    try { localStorage.setItem(EV_KEY, JSON.stringify(o)); return true; } catch (e) { return false; }
+  }
+  function dowText(v) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || '');
+    if (!m) return '';
+    var d = new Date(+m[1], +m[2] - 1, +m[3]);
+    return d.getMonth() !== +m[2] - 1 ? '' : DOW[d.getDay()];
+  }
+  function whenText(o) {
+    var w = dowText(o.date);
+    if (!w) return '0000년 00월 00일 (요일) 00:00';
+    var p = o.date.split('-');
+    var t = o.start ? ' ' + o.start + (o.end ? ' ~ ' + o.end : '') : '';
+    return p[0] + '년 ' + p[1] + '월 ' + p[2] + '일 (' + w + ')' + t;
+  }
+  var pendingImg = '';
+  function lum(hex) {
+    var m = /^#([0-9a-f]{6})$/i.exec(hex || '');
+    if (!m) return 1;
+    var n = parseInt(m[1], 16);
+    return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
+  }
+  function paintHero(el, o) {
+    var img = o.bgImg && /^data:image\//.test(o.bgImg) ? o.bgImg : '';
+    var col = o.bg && /^#[0-9a-f]{6}$/i.test(o.bg) ? o.bg : '';
+    var styled = !!(img || col);
+    el.classList.toggle('styled', styled);
+    el.style.backgroundColor = col;
+    if (img) {
+      var d = (o.dim == null ? 35 : o.dim) / 100;
+      el.style.backgroundImage = 'linear-gradient(rgba(0,0,0,' + d + '),rgba(0,0,0,' + d + ')),url("' + img + '")';
+    } else el.style.backgroundImage = '';
+    var tc = o.tc || 'auto';
+    var cc = o.tcc && /^#[0-9a-f]{6}$/i.test(o.tcc) ? o.tcc : '#ffffff';
+    el.classList.toggle('tcol', styled || tc !== 'auto');
+    var fg;
+    if (tc === 'custom') fg = cc;
+    else if (tc === 'light') fg = '#ffffff';
+    else if (tc === 'dark') fg = '#111111';
+    else fg = (img || lum(col) < 0.55) ? '#ffffff' : '#111111';
+    el.style.setProperty('--hfg', fg);
+    el.style.setProperty('--hfg2', 'color-mix(in srgb,' + fg + ' 85%,transparent)');
+  }
+  function applyEvent() {
+    var o = evLoad();
+    $('evTitle').textContent = o.name || '이벤트 이름을 입력하세요';
+    $('evWhen').textContent = whenText(o);
+    $('evPlace').textContent = o.addr || '장소 또는 온라인 링크 안내';
+    $('evTarget').textContent = o.target || '참가 대상 안내';
+    if (o.name) document.title = o.name + ' 참가 신청';
+    paintHero($('heroEl'), o);
+  }
+  function formObj() {
+    return {
+      name: $('evName').value.trim(), date: $('evDate').value, start: $('evStart').value, end: $('evEnd').value,
+      addr: $('evAddr').value.trim(), target: $('evTgt').value.trim(),
+      bg: $('evBgOn').checked ? $('evBgColor').value : '', bgImg: pendingImg,
+      dim: parseInt($('evDim').value, 10), tc: $('evTc').value, tcc: $('evTcColor').value
+    };
+  }
+  function evPrev() {
+    var o = formObj(), p = $('heroPrev');
+    $('evDimVal').textContent = o.dim + '%';
+    $('evTcColor').classList.toggle('hidden', o.tc !== 'custom');
+    p.textContent = '';
+    var tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = '참가 신청';
+    var h = document.createElement('h1'); h.textContent = o.name || '이벤트 이름을 입력하세요';
+    var ul = document.createElement('ul'); ul.className = 'meta';
+    [['일시', whenText(o)], ['장소', o.addr || '장소 또는 온라인 링크 안내'], ['대상', o.target || '참가 대상 안내']].forEach(function (r) {
+      var li = document.createElement('li'), b = document.createElement('b'), sp = document.createElement('span');
+      b.textContent = r[0]; sp.textContent = r[1]; li.appendChild(b); li.appendChild(sp); ul.appendChild(li);
+    });
+    p.appendChild(tag); p.appendChild(h); p.appendChild(ul);
+    paintHero(p, o);
+  }
+  function fillEventForm() {
+    var o = evLoad();
+    $('evName').value = o.name || ''; $('evDate').value = o.date || '';
+    $('evStart').value = o.start || ''; $('evEnd').value = o.end || '';
+    $('evAddr').value = o.addr || ''; $('evTgt').value = o.target || '';
+    $('evBgOn').checked = !!o.bg; $('evBgColor').value = o.bg || '#3b5bdb';
+    pendingImg = o.bgImg || '';
+    $('evDim').value = o.dim == null ? 35 : o.dim; $('evTc').value = o.tc || 'auto'; $('evTcColor').value = o.tcc || '#ffffff';
+    $('evImgFile').value = '';
+    $('evImgInfo').textContent = pendingImg ? '이미지가 적용되어 있습니다.' : '이미지는 가로 1280px 이내로 자동 축소되어 저장됩니다.';
+    updateDow(); evPrev();
+  }
+  /* 색상 견본 */
+  ['#3b5bdb', '#0f172a', '#1f7a4d', '#7c3aed', '#b42318', '#f59e0b'].forEach(function (c) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'sw'; b.style.background = c; b.setAttribute('aria-label', '배경 색상 ' + c);
+    b.addEventListener('click', function () { $('evBgColor').value = c; $('evBgOn').checked = true; evPrev(); });
+    $('evSw').appendChild(b);
+  });
+  $('evBgColor').addEventListener('input', function () { $('evBgOn').checked = true; });
+  $('eventCard').addEventListener('input', evPrev);
+  $('eventCard').addEventListener('change', evPrev);
+  $('evImgFile').addEventListener('change', function () {
+    var f = this.files && this.files[0];
+    if (!f) return;
+    if (!/^image\//.test(f.type) || f.size > 15 * 1024 * 1024) { setMsg($('evMsg'), '15MB 이하의 이미지 파일만 사용할 수 있습니다.', 'err'); this.value = ''; return; }
+    var fr = new FileReader();
+    fr.onload = function () {
+      var im = new Image();
+      im.onload = function () {
+        var sc = Math.min(1, 1280 / im.width), c = document.createElement('canvas');
+        c.width = Math.round(im.width * sc); c.height = Math.round(im.height * sc);
+        c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+        pendingImg = c.toDataURL('image/jpeg', 0.82);
+        $('evImgInfo').textContent = '이미지가 선택되었습니다. 저장을 눌러야 적용됩니다. (약 ' + Math.round(pendingImg.length * 0.75 / 1024) + 'KB)';
+        evPrev();
+      };
+      im.onerror = function () { setMsg($('evMsg'), '이미지를 읽을 수 없습니다.', 'err'); };
+      im.src = fr.result;
+    };
+    fr.readAsDataURL(f);
+  });
+  $('evImgDel').addEventListener('click', function () {
+    pendingImg = ''; $('evImgFile').value = '';
+    $('evImgInfo').textContent = '이미지를 삭제했습니다. 저장을 눌러야 적용됩니다.';
+    evPrev();
+  });
+  function updateDow() {
+    var w = dowText($('evDate').value);
+    $('evDow').textContent = w ? '선택한 요일: ' + w + '요일' : '';
+  }
+  $('evDate').addEventListener('input', updateDow);
+  $('evDate').addEventListener('change', updateDow);
+  $('evSave').addEventListener('click', function () {
+    var o = formObj();
+    if (o.start && o.end && o.end <= o.start) { setMsg($('evMsg'), '끝나는 시간은 시작 시간보다 늦어야 합니다.', 'err'); return; }
+    var ok = evStore(o);
+    applyEvent();
+    setMsg($('evMsg'), ok ? '저장되었습니다. 신청 화면에 반영됩니다.' : '저장 공간이 부족하거나 사용할 수 없습니다. 더 작은 이미지를 사용하거나 이미지를 삭제해 주세요.', ok ? 'ok' : 'err');
+  });
+  $('evReset').addEventListener('click', function () {
+    if (!confirm('이벤트 정보를 모두 초기화할까요?')) return;
+    evStore({}); fillEventForm(); applyEvent();
+    setMsg($('evMsg'), '초기화되었습니다.', 'info');
+  });
+
+  function dayKey(ts) { var d = new Date(ts); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+  function mkRow(vals) {
+    var tr = document.createElement('tr');
+    vals.forEach(function (v) { var td = document.createElement('td'); td.textContent = v; tr.appendChild(td); });
+    return tr;
+  }
+  function renderDash() {
+    var list = loadList().slice().sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
+    var total = 0;
+    list.forEach(function (r) { total += r.count || 1; });
+    var n = list.length;
+    $('kCount').textContent = n + '건';
+    $('kCountSub').textContent = n ? '최초 등록 ' + fmt(list[n - 1].createdAt) : '아직 신청이 없습니다';
+    $('kPeople').textContent = total + '명';
+    $('kPeopleSub').textContent = n ? '신청 1건당 평균 ' + (total / n).toFixed(1) + '명' : '-';
+    $('kLast').textContent = n ? fmt(list[0].createdAt) : '-';
+    $('kLastSub').textContent = n ? maskName(list[0].name) + ' · ' + (list[0].company || '-') : '-';
+    var today = dayKey(Date.now()), tc = 0, tp = 0;
+    list.forEach(function (r) { if (dayKey(r.createdAt) === today) { tc++; tp += r.count || 1; } });
+    $('kToday').textContent = tc + '건';
+    $('kTodaySub').textContent = '인원 ' + tp + '명';
+
+    /* 최근 7일 추이 */
+    var box = $('dTrend'); box.textContent = '';
+    var days = [], max = 1, i;
+    for (i = 6; i >= 0; i--) {
+      var d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - i);
+      days.push({ key: dayKey(d.getTime()), label: (d.getMonth() + 1) + '/' + d.getDate(), c: 0 });
+    }
+    list.forEach(function (r) { days.forEach(function (x) { if (x.key === dayKey(r.createdAt)) x.c++; }); });
+    days.forEach(function (x) { if (x.c > max) max = x.c; });
+    days.forEach(function (x) {
+      var col = document.createElement('div'); col.className = 'bar';
+      var b = document.createElement('b'); b.textContent = x.c;
+      var bar = document.createElement('i'); bar.style.height = Math.round(x.c / max * 100) + '%';
+      var lb = document.createElement('span'); lb.textContent = x.label;
+      col.appendChild(b); col.appendChild(bar); col.appendChild(lb);
+      box.appendChild(col);
+    });
+
+    /* 이벤트 요약 */
+    var o = evLoad();
+    var dl = $('dEvent'); dl.textContent = '';
+    [['이름', o.name || '미설정'], ['일시', o.date ? whenText(o) : '미설정'], ['장소', o.addr || '미설정'], ['대상', o.target || '미설정']].forEach(function (p) {
+      var dt = document.createElement('dt'); dt.textContent = p[0];
+      var dd = document.createElement('dd'); dd.textContent = p[1];
+      dl.appendChild(dt); dl.appendChild(dd);
+    });
+    var dd0 = '';
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(o.date || '');
+    if (m) {
+      var t0 = new Date(); t0.setHours(0, 0, 0, 0);
+      var diff = Math.round((new Date(+m[1], +m[2] - 1, +m[3]) - t0) / 86400000);
+      dd0 = diff === 0 ? 'D-Day' : diff > 0 ? 'D-' + diff : '종료 D+' + (-diff);
+    }
+    $('dDday').textContent = dd0;
+    $('dDday').classList.toggle('hidden', !dd0);
+
+    /* 최근 5건 */
+    var rb = $('dRecent'); rb.textContent = '';
+    if (!n) { var tr0 = document.createElement('tr'), td0 = document.createElement('td'); td0.colSpan = 4; td0.style.color = 'var(--muted)'; td0.textContent = '저장된 신청이 없습니다.'; tr0.appendChild(td0); rb.appendChild(tr0); }
+    list.slice(0, 5).forEach(function (r) { rb.appendChild(mkRow([fmt(r.createdAt), maskName(r.name), r.company || '-', String(r.count || 1)])); });
+  }
+
+  function renderList() {
+    var all = loadList().slice().sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
+    var q = $('listSearch').value.trim().toLowerCase();
+    var list = q ? all.filter(function (r) { return (r.email || '').toLowerCase().indexOf(q) >= 0; }) : all;
+    var tb = $('listRows');
+    tb.textContent = '';
+    var total = 0;
+    if (!list.length) {
+      var tr0 = document.createElement('tr');
+      var td0 = document.createElement('td');
+      td0.colSpan = 8;
+      td0.textContent = all.length ? '"' + $('listSearch').value.trim() + '" 이메일 검색 결과가 없습니다.' : '저장된 신청이 없습니다.';
+      td0.style.color = 'var(--muted)';
+      tr0.appendChild(td0);
+      tb.appendChild(tr0);
+    }
+    list.forEach(function (r) {
+      total += r.count || 1;
+      var tr = document.createElement('tr');
+      [fmt(r.createdAt), maskName(r.name), r.email, r.company, r.position, maskPhone(r.phone), String(r.count || 1)].forEach(function (v) {
+        var td = document.createElement('td');
+        td.textContent = v == null ? '' : v;
+        tr.appendChild(td);
+      });
+      var tdDel = document.createElement('td');
+      var btn = document.createElement('button');
+      btn.className = 'btn ghost';
+      btn.style.padding = '6px 10px';
+      btn.style.fontSize = '13px';
+      btn.textContent = '삭제';
+      btn.addEventListener('click', function () { removeEntry(r.id, true); });
+      tdDel.appendChild(btn);
+      tr.appendChild(tdDel);
+      tb.appendChild(tr);
+    });
+    $('listCount').textContent = (q ? '검색 ' + list.length + '건 / 전체 ' + all.length + '건' : list.length + '건') + ' · 총 ' + total + '명';
+    renderDash();
+  }
+  function removeEntry(id, ask) {
+    if (ask && !confirm('이 신청을 삭제할까요?')) return;
+    var list = loadList();
+    var i = findIndexById(list, id);
+    if (i >= 0) { list.splice(i, 1); saveList(list); }
+    if (id === currentId) resetToNewForm();
+    renderList();
+  }
+
+  function setFieldError(id, text) {
+    var el = $(id), er = $(id + 'Err');
+    el.classList.toggle('invalid', !!text);
+    er.textContent = text || '';
+    er.classList.toggle('hidden', !text);
+  }
+
+  $('submitBtn').addEventListener('click', function () {
+    setFieldError('email', '');
+    setFieldError('phone', '');
+    var err = validate();
+    if (err === '__CONSENT__') {
+      var cmsg = '개인정보 동의 및 파기는 필수 입니다.';
+      setMsg($('msg'), cmsg, 'err');
+      alert(cmsg);
+      return;
+    }
+    if (err) { setMsg($('msg'), err, 'err'); return; }
+
+    var now = Date.now();
+    var data = {
+      name: $('name').value.trim(),
+      email: $('email').value.trim(),
+      company: $('company').value.trim(),
+      position: $('position').value.trim(),
+      phone: $('phone').value.trim(),
+      count: parseInt($('count').value, 10),
+      note: $('note').value.trim(),
+      updatedAt: now
+    };
+    var list = loadList();
+    var idx = currentId ? findIndexById(list, currentId) : -1;
+    var dupEmail = false, dupPhone = false;
+    var phoneKey = data.phone.replace(/\D/g, '');
+    for (var i = 0; i < list.length; i++) {
+      if (i === idx) continue;
+      if ((list[i].email || '').toLowerCase() === data.email.toLowerCase()) dupEmail = true;
+      if (phoneKey && (list[i].phone || '').replace(/\D/g, '') === phoneKey) dupPhone = true;
+    }
+    if (dupEmail || dupPhone) {
+      setFieldError('email', dupEmail ? '중복된 정보를 입력하였습니다.' : '');
+      setFieldError('phone', dupPhone ? '중복된 정보를 입력하였습니다.' : '');
+      setMsg($('msg'), '', 'info');
+      $(dupEmail ? 'email' : 'phone').focus();
+      return;
+    }
+    if (idx >= 0) {
+      data.id = list[idx].id;
+      data.createdAt = list[idx].createdAt || now;
+      list[idx] = data;
+    } else {
+      data.id = 'r' + now.toString(36) + Math.random().toString(36).slice(2, 7);
+      data.createdAt = now;
+      list.push(data);
+    }
+    var persisted = saveList(list);
+    currentId = data.id;
+    setMsg($('msg'), '', 'info');
+    showDone(data);
+    renderList();
+
+    var notes = [];
+    if (!persisted) notes.push('이 브라우저에서 저장 공간을 사용할 수 없어 새로고침하면 명단이 사라집니다.');
+    setMsg($('doneMsg'), notes.join(' '), persisted ? 'info' : 'err');
+  });
+
+  $('editBtn').addEventListener('click', function () {
+    var list = loadList();
+    var i = findIndexById(list, currentId);
+    showForm();
+    if (i >= 0) {
+      var c = list[i];
+      $('name').value = c.name || '';
+      $('email').value = c.email || '';
+      $('company').value = c.company || '';
+      $('position').value = c.position || '';
+      $('phone').value = c.phone || '';
+      $('count').value = c.count || 1;
+      $('note').value = c.note || '';
+      $('note').dispatchEvent(new Event('input'));
+      $('consent').checked = true;
+    }
+  });
+
+  $('cancelBtn').addEventListener('click', function () {
+    if (!confirm('신청을 취소할까요?')) return;
+    removeEntry(currentId, false);
+    setMsg($('msg'), '신청이 취소되었습니다.', 'ok');
+  });
+
+  $('newBtn').addEventListener('click', resetToNewForm);
+
+  $('clearAllBtn').addEventListener('click', function () {
+    if (!loadList().length) return;
+    if (!confirm('이 브라우저에 저장된 신청 명단을 모두 삭제할까요?')) return;
+    saveList([]);
+    resetToNewForm();
+    renderList();
+  });
+
+  window.addEventListener('storage', function (e) {
+    if (e.key === KEY) renderList();
+  });
+
+  function bindFilter(el, re, after) {
+    var composing = false;
+    function clean() {
+      var v = el.value.replace(re, '');
+      if (v !== el.value) el.value = v;
+      if (after) after(el);
+    }
+    el.addEventListener('compositionstart', function () { composing = true; });
+    el.addEventListener('compositionend', function () { composing = false; clean(); });
+    el.addEventListener('input', function () {
+      if (composing) { if (after) after(el); } else { clean(); }
+    });
+  }
+  function updateNoteCount(el) { $('noteCount').textContent = el.value.length + '/500'; }
+
+  bindFilter($('name'), /[^가-힣A-Za-z]/g);
+  bindFilter($('email'), /[^A-Za-z0-9._%+\-@]/g);
+  bindFilter($('note'), /[^\u0020-\u007E\n\r\t가-힣ㄱ-ㅎㅏ-ㅣ\u2018\u2019\u201C\u201D\u00B7\u2026]/g, updateNoteCount);
+
+  $('phone').addEventListener('input', function () {
+    var d = this.value.replace(/\D/g, '');
+    var a = d.indexOf('02') === 0 ? 2 : 3;
+    d = d.slice(0, a === 2 ? 10 : 11);
+    var out = d;
+    if (d.length > a) out = d.slice(0, a) + '-' + d.slice(a);
+    if (d.length > a + 4) out = d.slice(0, a) + '-' + d.slice(a, a + 4) + '-' + d.slice(a + 4);
+    this.value = out;
+  });
+
+  var cnt = $('count');
+  cnt.addEventListener('keydown', function (e) {
+    if (['e', 'E', '+', '-', '.'].indexOf(e.key) >= 0) e.preventDefault();
+  });
+  cnt.addEventListener('input', function () {
+    var n = parseInt(cnt.value, 10);
+    if (n > 10) cnt.value = 10;
+    if (n < 1) cnt.value = 1;
+  });
+  cnt.addEventListener('blur', function () {
+    if (!cnt.value || parseInt(cnt.value, 10) < 1) cnt.value = 1;
+  });
+
+  ['email', 'phone'].forEach(function (id) {
+    $(id).addEventListener('input', function () { setFieldError(id, ''); });
+  });
+
+  applyEvent();
+  renderList();
+})();
+</script>
+</body>
+</html>
